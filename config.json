@@ -1,6 +1,6 @@
 {
     "tables": [
-        "table1", "table2", "table3"
+        "caas_credential"
     ],
     "source": {
         "dbms": "postgres",
@@ -13,15 +13,15 @@
     "column-converter": [
         {
             "table-name": "*",
-            "column-name": "id",
-            "converter": "Random",
+            "column-name": "password",
+            "converter": "ReplaceAll",
             "converter-parameters": ""
         },
         {
-            "table-name": "table2",
-            "column-name": "column2",
-            "converter": "ReplaceAll",
-            "converter-parameters": "***"
+            "table-name": "caas_credential",
+            "column-name": "phone_number",
+            "converter": "Replace",
+            "converter-parameters": "*, 4, 5"
         }
     ]
 }

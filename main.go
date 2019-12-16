@@ -66,14 +66,18 @@ func allTableNames(config *maskingConfig) []string {
 	return config.Tables
 }
 
-func processTable(masker *dataMasking, dbURL string, tableName string) {
-	pgReader := newPostgresTableReader(dbURL, tableName)
+func processTable(masker *dataMasking, srcDBURL, destDBURL string, tableName string) {
+	pgReader := newPostgresTableReader(srcDBURL, tableName)
+	pgWriter := newPostgresTableWriter(destDBURL, tableName)
 	if pgReader.HasRow() {
-		fmt.Printf("Table %s has records.", tableName)
-		rows := pgReader.ReadRows()
-		showRows(rows)
-		newRows := (*masker).mask(tableName, rows)
-		showRows(newRows)
+		for pgReader.HasRow() {
+			fmt.Printf("Table %s has records.", tableName)
+			rows := pgReader.ReadRows()
+			showRows(rows)
+			newRows := (*masker).mask(tableName, rows)
+			showRows(newRows)
+			pgWriter.WriteRows(newRows)
+		}
 	} else {
 		fmt.Printf("Table %s has no records.", tableName)
 	}
@@ -82,7 +86,7 @@ func processTable(masker *dataMasking, dbURL string, tableName string) {
 func process(masker *dataMasking, config *maskingConfig) {
 	tableNames := allTableNames(config)
 	for i := range tableNames {
-		processTable(masker, config.SrcDb.DbURL, tableNames[i])
+		processTable(masker, config.SrcDb.DbURL, config.DestDb.DbURL, tableNames[i])
 	}
 }
 

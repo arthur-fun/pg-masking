@@ -9,8 +9,19 @@ import (
 
 //connStr := "postgres://pqgotest:password@localhost/pqgotest?sslmode=verify-full"
 
-func newPostgresTableReader(connStr string, tableName string) postgresTableReader {
-	return postgresTableReader{connStr, tableName, -1, 100, 0}
+func newPostgresTableReader(connStr string, tableName string) tableReader {
+	return &postgresTableReader{connStr, tableName, -1, 100, 0}
+}
+
+func newPostgresTableWriter(connStr string, tableName string) tableWriter {
+	return &postgresTableWriter{}
+}
+
+type postgresTableWriter struct {
+}
+
+func (pgWriter *postgresTableWriter) WriteRows(rows []dataRow) {
+	showRows(rows)
 }
 
 type postgresTableReader struct {
@@ -72,7 +83,7 @@ func (pgReader *postgresTableReader) ReadRows() []dataRow {
 	checkErr(err)
 	defer db.Close()
 
-	rows, err := db.Query(fmt.Sprintf(`select * from %s limit %s offset %s`, pgReader.tableName, pgReader.pageSize, pgReader.cursor))
+	rows, err := db.Query(fmt.Sprintf(`select * from %s limit %d offset %d`, pgReader.tableName, pgReader.pageSize, pgReader.cursor))
 	checkErr(err)
 	fmt.Println("Table ", pgReader.tableName, " has ", pgReader.rowCount, "rows.")
 	length := pgReader.pageSize

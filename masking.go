@@ -1,5 +1,10 @@
 package main
 
+import (
+	"strconv"
+	"strings"
+)
+
 func newDataMasker(config []converterConfig) dataMasking {
 	gConvs := make(map[string]cellConverter)
 	tConvs := make(map[string]cellConverter)
@@ -9,6 +14,16 @@ func newDataMasker(config []converterConfig) dataMasking {
 		switch config[i].Converter {
 		case "ReplaceAll":
 			converter = replaceAllConverter{config[i].ConvParameters}
+		case "Replace":
+			params := strings.Split(config[i].ConvParameters, ",")
+			if len(params) != 3 {
+				panic("Failed to parse the parameters of replaceConverter")
+			}
+			start, err := strconv.Atoi(params[1])
+			checkErr(err)
+			length, err := strconv.Atoi(params[2])
+			checkErr(err)
+			converter = replaceConverter{params[0], start, length}
 		case "Random":
 			converter = randomConverter{}
 		default:
