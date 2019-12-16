@@ -57,6 +57,35 @@ func showRows(rs []dataRow) {
 	}
 }
 
+func allTableNames(config *maskingConfig) []string {
+	for i := range config.Tables {
+		if config.Tables[i] == "*" {
+			return queryAllTableNames(config.SrcDb.DbURL)
+		}
+	}
+	return config.Tables
+}
+
+func processTable(masker *dataMasking, dbURL string, tableName string) {
+	pgReader := newPostgresTableReader(dbURL, tableName)
+	if pgReader.HasRow() {
+		fmt.Printf("Table %s has records.", tableName)
+		rows := pgReader.ReadRows()
+		showRows(rows)
+		newRows := (*masker).mask(tableName, rows)
+		showRows(newRows)
+	} else {
+		fmt.Printf("Table %s has no records.", tableName)
+	}
+}
+
+func process(masker *dataMasking, config *maskingConfig) {
+	tableNames := allTableNames(config)
+	for i := range tableNames {
+		processTable(masker, config.SrcDb.DbURL, tableNames[i])
+	}
+}
+
 func main() {
 	flag.Parse()
 	fmt.Printf("Hellow world!\n")
@@ -75,15 +104,7 @@ func main() {
 
 	fmt.Println(config)
 
-	pgReader := newPostgresTableReader(config.SrcDb.DbURL, "caas_realm")
-	if pgReader.HasRow() {
-		fmt.Println("Table caas_realm has records.")
-		rows := pgReader.ReadRows()
-		showRows(rows)
-		masker := newDataMasker(config.Converters)
-		newRows := masker.mask(rows)
-		showRows(newRows)
-	} else {
-		fmt.Println("Table caas_realm has no records.")
-	}
+	masker := newDataMasker(config.Converters)
+
+	process(&masker, config)
 }

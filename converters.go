@@ -5,13 +5,34 @@ import (
 	"time"
 )
 
-type replaceConverter struct {
+type replaceAllConverter struct {
 	placeHolder string
 }
 
-func (rc replaceConverter) mask(src interface{}) interface{} {
+func (rac replaceAllConverter) mask(src interface{}) interface{} {
 	if _, ok := src.(string); ok {
-		return rc.placeHolder
+		return rac.placeHolder
+	}
+	return src
+}
+
+type replaceConverter struct {
+	placeHolder string
+	start       int
+	maskLength  int
+}
+
+func (rc replaceConverter) mask(src interface{}) interface{} {
+	if v, ok := src.(string); ok {
+		srcLength := len(v)
+		s := (rc.start + srcLength) % srcLength
+		if s < 0 || s >= srcLength {
+			return v
+		}
+		if s+rc.maskLength >= srcLength {
+			return v[0:s] + rc.placeHolder
+		}
+		return v[0:s] + rc.placeHolder + v[s+rc.maskLength:]
 	}
 	return src
 }

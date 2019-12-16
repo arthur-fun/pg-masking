@@ -20,7 +20,7 @@
         {
             "table-name": "table2",
             "column-name": "column2",
-            "converter": "Replace",
+            "converter": "ReplaceAll",
             "converter-parameters": "***"
         }
     ]

@@ -7,8 +7,8 @@ func newDataMasker(config []converterConfig) dataMasking {
 	for i := range config {
 		var converter cellConverter
 		switch config[i].Converter {
-		case "Replace":
-			converter = replaceConverter{config[i].ConvParameters}
+		case "ReplaceAll":
+			converter = replaceAllConverter{config[i].ConvParameters}
 		case "Random":
 			converter = randomConverter{}
 		default:
@@ -28,7 +28,7 @@ type dataConveters struct {
 	tableConverters  map[string]cellConverter
 }
 
-func (dc dataConveters) mask(rows []dataRow) []dataRow {
+func (dc dataConveters) mask(tableName string, rows []dataRow) []dataRow {
 	newRows := make([]dataRow, len(rows), len(rows))
 	for i := range rows {
 		newRows[i] = rows[i]
@@ -37,7 +37,7 @@ func (dc dataConveters) mask(rows []dataRow) []dataRow {
 			cellName := rows[i].ColumnNames[j]
 			if converter, ok := dc.globalConverters[cellName]; ok {
 				newRows[i].DataCells[j] = converter.mask(rows[i].DataCells[j])
-			} else if converter, ok := dc.tableConverters[cellName]; ok {
+			} else if converter, ok := dc.tableConverters[tableName+"___"+cellName]; ok {
 				newRows[i].DataCells[j] = converter.mask(rows[i].DataCells[j])
 			} else {
 				newRows[i].DataCells[j] = rows[i].DataCells[j]

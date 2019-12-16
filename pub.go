@@ -17,18 +17,20 @@ type cellConverter interface {
 }
 
 type dataRow struct {
+	TableName   string
 	ColumnNames []string
 	ColumnTypes []string
 	DataCells   []interface{}
 }
 
 type tableReader interface {
+	TableName() string
 	HasRow() bool
 	ReadRows() []dataRow
 }
 
 type dataMasking interface {
-	mask([]dataRow) []dataRow
+	mask(tableName string, rows []dataRow) []dataRow
 }
 
 type tableWriter interface {
