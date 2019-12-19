@@ -5,36 +5,61 @@ This is a tool to masking data of postgres database due to security reason. For 
 $ pg_masking -f config.json
 
 # configuration
-The tool pg_masking needs a configuration file in json format, as shown below:
+The tool pg_masking needs a configuration file (e.g. config.json) in json format, as shown below:
 ```json5
 {
     "tables": [
-        "table1", "table2", "table3"
+        "t1"
     ],
     "source": {
-        "connection": {
-            "dbms": "postgres",
-            "dburl": ""
-        }
+        "dbms": "postgres",
+        "dburl": "postgres://<user>:<password>@<host>/<db1>?sslmode=disable"
+    },
+    "destination": {
+        "dbms": "postgres",
+        "dburl": "postgres://<user>:<password>@<host>/<db2>?sslmode=disable"
     },
     "column-converter": [
         {
             "table-name": "*",
-            "column-name": "column1",
-            "converter": "converter1"
+            "column-name": "amount",
+            "converter": "Random"
+        },        
+        {
+            "table-name": "*",
+            "column-name": "password",
+            "converter": "ReplaceAll",
+            "converter-parameters": ""
         },
         {
-            "table-name": "table2",
-            "column-name": "column2",
-            "converter": "converter2"
+            "table-name": "t1",
+            "column-name": "phone_number",
+            "converter": "Replace",
+            "converter-parameters": "*****, 4"
         }
-    ],
-    "destination": {
-        "connection": {
-            "dbms": "postgres",
-            "dburl": ""
-        }
-    }
+    ]
 }
 ```
 
+# database data type supported to be transfered for now is shown below:
+- "BOOL"          
+- "BPCHAR"        
+- "CHAR"          
+- "DATE"          
+- "FLOAT4"        
+- "FLOAT8"        
+- "INT2"          
+- "INT4"          
+- "INT8"          
+- "NUMERIC"       
+- "TEXT"          
+- "TIME"          
+- "TIMETZ"        
+- "TIMESTAMP"     
+- "TIMESTAMPTZ"   
+- "VARCHAR"       
+
+# converters and database data type supported to be masked for now is shown below:
+- ReplaceAll: BPCHAR, CHAR, VARCHAR, TEXT
+- Replace: BPCHAR, CHAR, VARCHAR, TEXT
+- Random: INT2, INT4, INT8, "NUMERIC", "FLOAT4", "FLOAT8"

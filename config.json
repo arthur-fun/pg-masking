@@ -1,6 +1,6 @@
 {
     "tables": [
-        "caas_credential"
+        "t1"
     ],
     "source": {
         "dbms": "postgres",
@@ -8,9 +8,39 @@
     },
     "destination": {
         "dbms": "postgres",
-        "dburl": ""
+        "dburl": "postgres://postgres:pwd123@localhost/test2?sslmode=disable"
     },
     "column-converter": [
+        {
+            "table-name": "*",
+            "column-name": "c6",
+            "converter": "Random"
+        },        
+        {
+            "table-name": "*",
+            "column-name": "c7",
+            "converter": "Random"
+        },        
+        {
+            "table-name": "*",
+            "column-name": "c8",
+            "converter": "Random"
+        },        
+        {
+            "table-name": "*",
+            "column-name": "c9",
+            "converter": "Random"
+        },        
+        {
+            "table-name": "*",
+            "column-name": "c10",
+            "converter": "Random"
+        },        
+        {
+            "table-name": "*",
+            "column-name": "c11",
+            "converter": "Random"
+        },        
         {
             "table-name": "*",
             "column-name": "password",
@@ -18,10 +48,22 @@
             "converter-parameters": ""
         },
         {
-            "table-name": "caas_credential",
+            "table-name": "t1",
             "column-name": "phone_number",
             "converter": "Replace",
-            "converter-parameters": "*, 4, 5"
+            "converter-parameters": "*****, 4"
+        },
+        {
+            "table-name": "t1",
+            "column-name": "c2",
+            "converter": "Replace",
+            "converter-parameters": "*****, 4"
+        },
+        {
+            "table-name": "t1",
+            "column-name": "c3",
+            "converter": "Replace",
+            "converter-parameters": "*****, 4"
         }
     ]
 }
