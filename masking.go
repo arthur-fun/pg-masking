@@ -16,14 +16,12 @@ func newDataMasker(config []converterConfig) dataMasking {
 			converter = replaceAllConverter{config[i].ConvParameters}
 		case "Replace":
 			params := strings.Split(config[i].ConvParameters, ",")
-			if len(params) != 3 {
+			if len(params) != 2 {
 				panic("Failed to parse the parameters of replaceConverter")
 			}
-			start, err := strconv.Atoi(params[1])
+			start, err := strconv.Atoi(strings.Trim(params[1], " "))
 			checkErr(err)
-			length, err := strconv.Atoi(params[2])
-			checkErr(err)
-			converter = replaceConverter{params[0], start, length}
+			converter = replaceConverter{params[0], start}
 		case "Random":
 			converter = randomConverter{}
 		default:
@@ -50,11 +48,15 @@ func (dc dataConveters) mask(tableName string, rows []dataRow) []dataRow {
 		newRows[i].DataCells = make([]interface{}, len(rows[i].DataCells))
 		for j := range rows[i].DataCells {
 			cellName := rows[i].ColumnNames[j]
-			if converter, ok := dc.globalConverters[cellName]; ok {
-				newRows[i].DataCells[j] = converter.mask(rows[i].DataCells[j])
-			} else if converter, ok := dc.tableConverters[tableName+"___"+cellName]; ok {
-				newRows[i].DataCells[j] = converter.mask(rows[i].DataCells[j])
-			} else {
+			gConverter, gOk := dc.globalConverters[cellName]
+			tConverter, tOk := dc.tableConverters[tableName+"___"+cellName]
+			if gOk {
+				newRows[i].DataCells[j] = gConverter.mask(rows[i].DataCells[j])
+			}
+			if tOk {
+				newRows[i].DataCells[j] = tConverter.mask(rows[i].DataCells[j])
+			}
+			if !gOk && !tOk {
 				newRows[i].DataCells[j] = rows[i].DataCells[j]
 			}
 		}

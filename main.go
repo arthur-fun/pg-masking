@@ -46,11 +46,9 @@ func showRows(rs []dataRow) {
 		fmt.Println(rs[i].ColumnNames)
 		fmt.Println(rs[i].ColumnTypes)
 		for j := range rs[i].DataCells {
-			if vRef, ok := rs[i].DataCells[j].(*int); ok {
+			if vRef, ok := rs[i].DataCells[j].(*interface{}); ok {
 				fmt.Print(*vRef)
 				fmt.Print("\t")
-			} else {
-				fmt.Println(rs[i].DataCells[j])
 			}
 		}
 		fmt.Println()
@@ -67,19 +65,23 @@ func allTableNames(config *maskingConfig) []string {
 }
 
 func processTable(masker *dataMasking, srcDBURL, destDBURL string, tableName string) {
+	fmt.Printf("Starting to mask %s.\n", tableName)
 	pgReader := newPostgresTableReader(srcDBURL, tableName)
 	pgWriter := newPostgresTableWriter(destDBURL, tableName)
 	if pgReader.HasRow() {
 		for pgReader.HasRow() {
-			fmt.Printf("Table %s has records.", tableName)
 			rows := pgReader.ReadRows()
+			fmt.Println("The data loaded from source via reader...")
 			showRows(rows)
+			fmt.Println("Done to load data.")
 			newRows := (*masker).mask(tableName, rows)
+			fmt.Println("The data after converted")
 			showRows(newRows)
+			fmt.Println("Done to print data converted")
 			pgWriter.WriteRows(newRows)
 		}
 	} else {
-		fmt.Printf("Table %s has no records.", tableName)
+		fmt.Printf("Table %s has no records.\n", tableName)
 	}
 }
 
@@ -92,7 +94,6 @@ func process(masker *dataMasking, config *maskingConfig) {
 
 func main() {
 	flag.Parse()
-	fmt.Printf("Hellow world!\n")
 	fmt.Println("Configuration file name is", *configFileName)
 
 	config := &maskingConfig{}

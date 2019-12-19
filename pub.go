@@ -17,7 +17,6 @@ type cellConverter interface {
 }
 
 type dataRow struct {
-	TableName   string
 	ColumnNames []string
 	ColumnTypes []string
 	DataCells   []interface{}
