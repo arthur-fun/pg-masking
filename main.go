@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"sync"
 )
 
 type dbInfo struct {
@@ -64,7 +65,7 @@ func allTableNames(config *maskingConfig) []string {
 	return config.Tables
 }
 
-func processTable(masker *dataMasking, srcDBURL, destDBURL string, tableName string) {
+func processTable(masker *dataMasking, srcDBURL, destDBURL string, tableName string, wg *sync.WaitGroup) {
 	fmt.Printf("Starting to mask %s.\n", tableName)
 	pgReader := newPostgresTableReader(srcDBURL, tableName)
 	pgWriter := newPostgresTableWriter(destDBURL, tableName)
@@ -83,13 +84,7 @@ func processTable(masker *dataMasking, srcDBURL, destDBURL string, tableName str
 	} else {
 		fmt.Printf("Table %s has no records.\n", tableName)
 	}
-}
-
-func process(masker *dataMasking, config *maskingConfig) {
-	tableNames := allTableNames(config)
-	for i := range tableNames {
-		processTable(masker, config.SrcDb.DbURL, config.DestDb.DbURL, tableNames[i])
-	}
+	wg.Done()
 }
 
 func main() {
@@ -111,5 +106,11 @@ func main() {
 
 	masker := newDataMasker(config.Converters)
 
-	process(&masker, config)
+	wg := sync.WaitGroup{}
+	tableNames := allTableNames(config)
+	for i := range tableNames {
+		wg.Add(1)
+		go processTable(&masker, config.SrcDb.DbURL, config.DestDb.DbURL, tableNames[i], &wg)
+	}
+	wg.Wait()
 }

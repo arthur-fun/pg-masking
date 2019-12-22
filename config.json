@@ -4,11 +4,11 @@
     ],
     "source": {
         "dbms": "postgres",
-        "dburl": "postgres://postgres:pwd123@localhost/test1?sslmode=disable"
+        "dburl": "postgres://postgres:pwd123@localhost:5433/test1?sslmode=disable"
     },
     "destination": {
         "dbms": "postgres",
-        "dburl": "postgres://postgres:pwd123@localhost/test2?sslmode=disable"
+        "dburl": "postgres://postgres:pwd123@localhost:5434/test2?sslmode=disable"
     },
     "column-converter": [
         {
